@@ -1,0 +1,240 @@
+/* Neobrutalist Theme Variables */
+:root {
+    --nb-bg: #ffffff;
+    --nb-text: #000000;
+    --nb-border: #000000;
+    --nb-shadow: 4px 4px 0px 0px #000000;
+    --nb-shadow-hover: 2px 2px 0px 0px #000000;
+    --nb-accent: #e0e7ff;
+    /* Keeping a slight accent for specific elements if needed, but mostly BW */
+    --nb-border-width: 3px;
+}
+
+.landing-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--nb-bg);
+    color: var(--nb-text);
+    font-family: 'Courier New', Courier, monospace;
+    /* Monospaced or bold sans usually fits */
+    overflow-y: auto;
+}
+
+/* Navbar */
+.landing-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    border-bottom: var(--nb-border-width) solid var(--nb-border);
+    background: #ffffff;
+}
+
+.nav-brand {
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: var(--nb-text);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: -1px;
+}
+
+.nav-links {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+/* Hero Section */
+.hero-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 6rem 2rem;
+    background: #ffffff;
+    /* Grid pattern background */
+    background-image: linear-gradient(var(--nb-border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--nb-border) 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-position: center center;
+    /* Make grid lines very subtle */
+    background-image: linear-gradient(#e5e5e5 1px, transparent 1px),
+        linear-gradient(90deg, #e5e5e5 1px, transparent 1px);
+}
+
+.hero-title {
+    font-size: 4rem;
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: 2rem;
+    color: var(--nb-text);
+    max-width: 900px;
+    text-transform: uppercase;
+    background: #fff;
+    padding: 1rem;
+    border: var(--nb-border-width) solid var(--nb-border);
+    box-shadow: var(--nb-shadow);
+}
+
+.hero-title span {
+    display: block;
+    font-style: italic;
+    text-decoration: underline;
+    text-decoration-thickness: 4px;
+}
+
+.hero-subtitle {
+    font-size: 1.5rem;
+    color: var(--nb-text);
+    max-width: 700px;
+    margin-bottom: 3rem;
+    line-height: 1.5;
+    font-weight: 600;
+    background: #fff;
+    padding: 1rem;
+    border: var(--nb-border-width) solid var(--nb-border);
+    box-shadow: var(--nb-shadow);
+}
+
+.cta-group {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+}
+
+/* Feature Section */
+.features-section {
+    background-color: #ffffff;
+    padding: 6rem 2rem;
+    border-top: var(--nb-border-width) solid var(--nb-border);
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 3rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.feature-card {
+    background: #ffffff;
+    padding: 2.5rem;
+    border: var(--nb-border-width) solid var(--nb-border);
+    box-shadow: var(--nb-shadow);
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.feature-card:hover {
+    transform: translate(-4px, -4px);
+    box-shadow: 8px 8px 0px 0px #000000;
+}
+
+.feature-icon {
+    font-size: 2rem;
+    color: var(--nb-text);
+    margin-bottom: 1.5rem;
+    background: #000;
+    color: #fff;
+    width: 70px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: var(--nb-border-width) solid var(--nb-border);
+    box-shadow: 4px 4px 0px 0px #888;
+}
+
+.feature-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+}
+
+.feature-desc {
+    color: var(--nb-text);
+    line-height: 1.6;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+/* Buttons - Neobrutalist Style */
+button,
+.btn-large,
+.btn-primary,
+.btn-secondary {
+    font-family: inherit;
+    font-weight: 800;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: var(--nb-border-width) solid var(--nb-border);
+    box-shadow: var(--nb-shadow);
+    transition: all 0.1s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+button:active,
+.btn-large:active,
+.btn-primary:active,
+.btn-secondary:active,
+button:hover,
+.btn-large:hover,
+.btn-primary:hover,
+.btn-secondary:hover {
+    transform: translate(2px, 2px);
+    box-shadow: var(--nb-shadow-hover);
+}
+
+.btn-large {
+    padding: 1.2rem 2.5rem;
+    font-size: 1.2rem;
+    background: #000;
+    color: #fff;
+}
+
+.btn-large.secondary {
+    background: #fff;
+    color: #000;
+}
+
+.btn-primary {
+    background: #000;
+    color: #fff !important;
+    /* Force text color for links */
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+}
+
+.btn-secondary {
+    background: #fff;
+    color: #000 !important;
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+}
+
+/* Footer */
+.landing-footer {
+    text-align: center;
+    padding: 3rem;
+    color: var(--nb-text);
+    border-top: var(--nb-border-width) solid var(--nb-border);
+    font-weight: 700;
+    text-transform: uppercase;
+    background: #fff;
+}

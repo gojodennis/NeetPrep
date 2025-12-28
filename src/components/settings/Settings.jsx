@@ -1,11 +1,19 @@
 import React, { useState } from 'react';
 import { useToast } from '../../context/ToastContext';
-import { CheckCircle, Info } from 'lucide-react';
+import { useAppContext } from '../../context/AppContext';
+import { CheckCircle } from 'lucide-react';
 
 const Settings = () => {
     const { addToast } = useToast();
+    const { state, setApiKey } = useAppContext();
     const [googleConnected, setGoogleConnected] = useState(false);
     const [connecting, setConnecting] = useState(false);
+    const [apiKeyInput, setApiKeyInput] = useState(state.config?.apiKey || '');
+
+    const handleSaveKey = () => {
+        setApiKey(apiKeyInput);
+        addToast("API Key Saved Successfully");
+    };
 
     const handleGoogleConnect = () => {
         setConnecting(true);
@@ -16,9 +24,7 @@ const Settings = () => {
         }, 1500);
     };
 
-    const handleTelegramTest = () => {
-        addToast("Telegram test message sent!");
-    };
+
 
     return (
         <div className="view-section active animate-fade-in">
@@ -27,6 +33,28 @@ const Settings = () => {
             </header>
 
             <div className="grid">
+                <div className="card">
+                    <h2>AI Configuration</h2>
+                    <p className="text-muted" style={{ fontSize: '0.9rem', marginBottom: '1rem' }}>
+                        Configure your Gemini API key to enable AI features.
+                        <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" style={{ marginLeft: '5px', color: 'var(--primary)' }}>Get Key</a>
+                    </p>
+                    <div className="form-group">
+                        <label>Gemini API Key</label>
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <input
+                                type="password"
+                                value={apiKeyInput}
+                                onChange={(e) => setApiKeyInput(e.target.value)}
+                                placeholder="Paste your API key here"
+                                style={{ flex: 1 }}
+                            />
+                            <button className="secondary" onClick={handleSaveKey}>Save</button>
+                        </div>
+                    </div>
+                </div>
+
+
                 <div className="card">
                     <h2>Google Integration</h2>
                     <p className="text-muted" style={{ fontSize: '0.9rem', marginBottom: '1rem' }}>
@@ -43,17 +71,7 @@ const Settings = () => {
                     )}
                 </div>
 
-                <div className="card">
-                    <h2>Telegram Reminders</h2>
-                    <p className="text-muted" style={{ fontSize: '0.9rem', marginBottom: '1rem' }}>
-                        Get notified 30 minutes before your study sessions.
-                    </p>
-                    <div className="form-group">
-                        <label>Telegram Chat ID</label>
-                        <input type="text" placeholder="e.g. 123456789" />
-                    </div>
-                    <button className="secondary" onClick={handleTelegramTest}>Test Notification</button>
-                </div>
+
 
                 <div className="card">
                     <h2>System Preferences</h2>

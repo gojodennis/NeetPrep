@@ -1,8 +1,23 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
-import { Dna, LineChart, Calendar, GraduationCap, Settings } from 'lucide-react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { Dna, LineChart, Calendar, GraduationCap, Settings, LogOut, Home } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 const Sidebar = () => {
+    const { signOut, user } = useAuth();
+    const navigate = useNavigate();
+
+    const handleLogout = async () => {
+        try {
+            await signOut();
+            navigate('/login');
+        } catch (error) {
+            console.error("Error logging out:", error);
+        }
+    };
+
+    const isGuest = user?.id === 'guest_user';
+
     return (
         <>
             {/* Desktop Sidebar */}
@@ -13,40 +28,51 @@ const Sidebar = () => {
                 </div>
                 <ul className="nav-links desktop">
                     <li>
-                        <NavLink to="/" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+                        <NavLink to="/app" end className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
                             <LineChart size={20} /> Dashboard
                         </NavLink>
                     </li>
                     <li>
-                        <NavLink to="/plan" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+                        <NavLink to="/app/plan" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
                             <Calendar size={20} /> Study Plan
                         </NavLink>
                     </li>
                     <li>
-                        <NavLink to="/quiz" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+                        <NavLink to="/app/quiz" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
                             <GraduationCap size={20} /> Adaptive Quiz
                         </NavLink>
                     </li>
                     <li>
-                        <NavLink to="/settings" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+                        <NavLink to="/app/settings" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
                             <Settings size={20} /> Settings
                         </NavLink>
+                    </li>
+                    <li style={{ marginTop: 'auto' }}>
+                        {isGuest ? (
+                            <button onClick={() => navigate('/')} className="nav-item" style={{ width: '100%', background: 'none', border: 'none', textAlign: 'left', fontSize: '1rem' }}>
+                                <Home size={20} /> Go Back Home
+                            </button>
+                        ) : (
+                            <button onClick={handleLogout} className="nav-item" style={{ width: '100%', background: 'none', border: 'none', textAlign: 'left', fontSize: '1rem' }}>
+                                <LogOut size={20} /> Logout
+                            </button>
+                        )}
                     </li>
                 </ul>
             </nav>
 
             {/* Mobile Bottom Nav */}
             <div className="mobile-nav">
-                <NavLink to="/" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+                <NavLink to="/app" end className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
                     <LineChart size={24} />
                 </NavLink>
-                <NavLink to="/plan" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+                <NavLink to="/app/plan" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
                     <Calendar size={24} />
                 </NavLink>
-                <NavLink to="/quiz" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+                <NavLink to="/app/quiz" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
                     <GraduationCap size={24} />
                 </NavLink>
-                <NavLink to="/settings" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+                <NavLink to="/app/settings" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
                     <Settings size={24} />
                 </NavLink>
             </div>
@@ -81,6 +107,7 @@ const Sidebar = () => {
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
+            height: 100%; /* Fill height to push logout to bottom */
         }
 
         .nav-item {
