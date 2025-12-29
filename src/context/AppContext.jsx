@@ -48,7 +48,7 @@ export const AppProvider = ({ children }) => {
             // Force reset to demo state
             setState({
                 ...initialState,
-                user: { ...initialState.user, name: "Guest User" }
+                user: { ...initialState.user, name: "Guest User", id: 'guest_user' }
             });
             return;
         }

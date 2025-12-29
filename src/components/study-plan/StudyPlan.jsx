@@ -1,9 +1,8 @@
-// ... existing code ...
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { Bot, Calendar, Clock, Target, BookOpen, Sparkles, ChevronRight, Terminal } from 'lucide-react';
+import { Bot, Calendar, Clock, Target, BookOpen, Sparkles, ChevronRight, Terminal, Zap, ArrowRight, Layout } from 'lucide-react';
 import { generateStudyPlan } from '../../services/aiService';
 
 const StudyPlan = () => {
@@ -12,6 +11,35 @@ const StudyPlan = () => {
     const { addToast } = useToast();
     const [loading, setLoading] = useState(false);
     const [statusText, setStatusText] = useState('');
+
+    const configPanelRef = useRef(null);
+    const [dashboardHeight, setDashboardHeight] = useState('auto');
+
+    useEffect(() => {
+        const updateHeight = () => {
+            if (configPanelRef.current && window.innerWidth >= 1024) {
+                setDashboardHeight(`${configPanelRef.current.offsetHeight}px`);
+            } else {
+                setDashboardHeight('auto');
+            }
+        };
+
+        // Initial update
+        updateHeight();
+
+        // Resize listener
+        window.addEventListener('resize', updateHeight);
+
+        // Mutation observer for content changes (optional but good for dynamic content)
+        const observer = new ResizeObserver(updateHeight);
+        if (configPanelRef.current) observer.observe(configPanelRef.current);
+
+        return () => {
+            window.removeEventListener('resize', updateHeight);
+            observer.disconnect();
+        };
+    }, [state.plan?.data]); // Re-run when plan data changes might affect layout
+
 
     const planData = state.plan?.data;
 
@@ -66,7 +94,7 @@ const StudyPlan = () => {
                 });
                 setStatusText("");
                 setLoading(false);
-                addToast("[DEMO] PLAN GENERATED");
+                addToast("PLAN GENERATED SUCCESSFULLY");
             }, 1500);
             return;
         }
@@ -94,401 +122,95 @@ const StudyPlan = () => {
     };
 
     return (
-        <div className="view-section active animate-fade-in premium-layout">
-            <style>{`
-                .premium-layout {
-                    --bg-dark: #0a0a0a;
-                    --bg-card: #ffffff;
-                    --accent-black: #000000;
-                    --text-primary: #0a0a0a;
-                    --text-secondary: #525252;
-                    --border-color: #000000;
-                    
-                    /* Fluid scaling base: using container query unit */
-                    container-type: inline-size;
-                    /* Reduced scale slightly to ensure very large screens don't look clumsy */
-                    font-size: 1cqi; 
+        <div className="animate-fade-in max-w-7xl mx-auto space-y-8 pb-12">
 
-                    background: #f5f5f5; 
-                    min-height: 100%;
-                    color: var(--text-primary);
-                    padding: 2em;
-                    border: 0.15em solid #000;
-                    position: relative;
-                    overflow: auto;
-                    font-family: 'JetBrains Mono', monospace;
-                }
-                
-                .header-section {
-                    position: relative;
-                    z-index: 1;
-                    margin-bottom: 2em;
-                    display: flex;
-                    align-items: center;
-                    gap: 1em;
-                }
+            {/* Header */}
+            <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h1 className="text-4xl font-display font-black text-earth-800 uppercase tracking-tight">
+                        AI Study Architect
+                    </h1>
+                    <p className="text-earth-600 font-medium mt-1 tracking-wide">
+                        DESIGN YOUR PATH TO VICTORY
+                    </p>
+                </div>
+                <div className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-earth-800 rounded-lg shadow-neobrutalism">
+                    <Zap className="text-earth-600 fill-earth-600" size={20} />
+                    <span className="font-bold font-mono text-earth-800">POWERED BY GEMINI 1.5 PRO</span>
+                </div>
+            </header>
 
-                .header-section h1 {
-                    font-size: 1.8em;
-                    font-weight: 700;
-                    color: #000;
-                    text-transform: uppercase;
-                    margin: 0;
-                    letter-spacing: -0.05em;
-                }
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
-                .header-icon-box {
-                    background: #000;
-                    padding: 0.8em;
-                    color: #fff;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
+                {/* Configuration Panel */}
+                <div ref={configPanelRef} className="lg:col-span-4 card-premium sticky top-8">
+                    <div className="flex items-center gap-3 mb-6 pb-4 border-b-2 border-earth-200">
+                        <div className="p-2 bg-earth-100 rounded-lg border border-earth-300">
+                            <Target size={20} className="text-earth-800" />
+                        </div>
+                        <h2 className="text-xl font-display font-bold text-earth-800 uppercase tracking-tight">
+                            Strategy Config
+                        </h2>
+                    </div>
 
-                .glass-card {
-                    background: #ffffff;
-                    border: 0.15em solid #000000;
-                    padding: 2em;
-                    box-shadow: 0.3em 0.3em 0px 0px #000000;
-                    position: relative;
-                    z-index: 1;
-                    /* Important: Standard Flex Col */
-                    display: flex;
-                    flex-direction: column;
-                }
-
-                .premium-grid {
-                    display: grid;
-                    /* Ratios: ~35% config, ~60% results, rest gap */
-                    grid-template-columns: 35fr 60fr; 
-                    gap: 3em; 
-                    position: relative;
-                    z-index: 1;
-                }
-
-                .config-panel {
-                    width: 100%;
-                }
-
-                .results-panel {
-                    width: 100%;
-                    /* Important: Standard flex col for mobile fallback */
-                    display: flex;
-                    flex-direction: column;
-                }
-
-                /* Desktop-specific layout for height matching */
-                @media (min-width: 769px) and (aspect-ratio >= 1/1) {
-                    .results-panel {
-                        /* Remove padding so absolute child can control it */
-                        padding: 0 !important;
-                    }
-                    
-                    .scroll-layout {
-                        position: absolute;
-                        top: 0; left: 0; right: 0; bottom: 0;
-                        padding: 2em;
-                        display: flex;
-                        flex-direction: column;
-                        overflow: hidden; /* Prevent spill */
-                    }
-                }
-
-                @media (max-width: 768px) or (aspect-ratio < 1/1) {
-                    .scroll-layout {
-                        display: flex;
-                        flex-direction: column;
-                        width: 100%;
-                        flex: 1;
-                    }
-                    
-                    /* Restore standard behavior for mobile */
-                    .premium-grid {
-                        grid-template-columns: 1fr;
-                        gap: 2em;
-                    }
-                     
-                    .premium-layout {
-                        /* Boost font size slightly on mobile for legibility */
-                        font-size: 2.5cqi; 
-                        padding: 1.5em;
-                    }
-
-                    .glass-card {
-                        height: auto;
-                    }
-                     
-                    .timeline-container {
-                        max-height: 50vh;
-                    }
-                }
-
-                .form-label {
-                    display: block;
-                    font-size: 0.9em;
-                    font-weight: 600;
-                    color: #000;
-                    margin-bottom: 0.6em;
-                    text-transform: uppercase;
-                }
-
-                .premium-input {
-                    width: 100%;
-                    background: #fff;
-                    border: 0.15em solid #000;
-                    color: #000;
-                    padding: 0.8em 1.2em;
-                    font-size: 1em;
-                    font-family: 'JetBrains Mono', monospace;
-                    outline: none;
-                    height: 3.5em;
-                }
-
-                .premium-input:focus {
-                    background: #000;
-                    color: #fff;
-                }
-
-                .generate-btn {
-                    width: 100%;
-                    background: #000;
-                    color: #fff;
-                    border: 0.15em solid #000;
-                    padding: 1.2em;
-                    font-weight: 700;
-                    font-size: 1em;
-                    cursor: pointer;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 0.6em;
-                    text-transform: uppercase;
-                    transition: all 0.1s;
-                    box-shadow: 0.2em 0.2em 0px 0px #555;
-                }
-
-                .generate-btn:hover {
-                    box-shadow: 0.4em 0.4em 0px 0px #555;
-                    transform: translate(-0.1em, -0.1em);
-                }
-                
-                .generate-btn:active {
-                    box-shadow: 0px 0px 0px 0px #555;
-                    transform: translate(0.1em, 0.1em);
-                }
-
-                .generate-btn:disabled {
-                    background: #555;
-                    cursor: not-allowed;
-                    transform: none;
-                    box-shadow: none;
-                }
-
-                .empty-state {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
-                    flex: 1; 
-                    min-height: 20em;
-                    color: #000;
-                    text-align: center;
-                }
-
-                .empty-icon-circle {
-                    width: 6em;
-                    height: 6em;
-                    background: #f5f5f5;
-                    border: 0.15em solid #000;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    margin-bottom: 2em;
-                    border-radius: 50%;
-                }
-
-                .results-content {
-                    display: flex;
-                    flex-direction: column;
-                    flex: 1;
-                    min-height: 0;
-                }
-
-                .timeline-container {
-                    padding-left: 1.5em;
-                    border-left: 0.15em solid #000;
-                    margin-top: 2em;
-                    flex: 1;
-                    min-height: 0; 
-                    overflow-y: auto;
-                    padding-right: 0.8em;
-                }
-
-                .timeline-container::-webkit-scrollbar {
-                    width: 0.6em;
-                }
-
-                .timeline-container::-webkit-scrollbar-track {
-                    background: #fff;
-                    border-left: 0.15em solid #000;
-                }
-
-                .timeline-container::-webkit-scrollbar-thumb {
-                    background: #000;
-                }
-
-                .timeline-container::-webkit-scrollbar-thumb:hover {
-                    background: #333;
-                }
-
-                .day-group {
-                    margin-bottom: 2.5em;
-                    position: relative;
-                }
-
-                .day-group::before {
-                    content: '';
-                    position: absolute;
-                    left: -2.12em;
-                    top: 0;
-                    width: 1em;
-                    height: 1em;
-                    background: #000;
-                    border: 0.15em solid #000;
-                }
-
-                .day-header {
-                    font-size: 1.1em;
-                    font-weight: 700;
-                    color: #000;
-                    margin-bottom: 1.2em;
-                    display: flex;
-                    align-items: center;
-                    text-transform: uppercase;
-                }
-
-                .session-card {
-                    background: #fff;
-                    border: 0.15em solid #000;
-                    padding: 1.2em;
-                    margin-bottom: 1em;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    transition: transform 0.1s;
-                    box-shadow: 0.2em 0.2em 0px 0px #ccc;
-                }
-
-                .session-card:hover {
-                    box-shadow: 0.3em 0.3em 0px 0px #aaa;
-                    transform: translate(-0.05em, -0.05em);
-                }
-
-                .tag-modern {
-                    padding: 0.3em 0.6em;
-                    font-size: 0.75em;
-                    font-weight: 700;
-                    text-transform: uppercase;
-                    border: 0.1em solid #000;
-                    background: #fff;
-                    color: #000;
-                }
-
-                .hour-circle {
-                    width: 4em;
-                    height: 4em;
-                    border: 0.15em solid #000;
-                    border-radius: 50%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-weight: 600;
-                    font-size: 1em;
-                    cursor: pointer;
-                    background: #fff;
-                    color: #000;
-                    transition: all 0.2s;
-                }
-                
-                .hour-circle:hover {
-                    background: #000;
-                    color: #fff;
-                }
-                
-                .hour-circle.active {
-                    background: #000;
-                    color: #fff;
-                    box-shadow: 0 0 0 0.15em #fff, 0 0 0 0.3em #000;
-                }
-
-                .focus-btn {
-                    background: #fff;
-                    border: 0.15em solid #000;
-                    color: #000;
-                    padding: 0.8em;
-                    font-family: inherit;
-                    text-transform: uppercase;
-                    font-size: 0.85em;
-                    cursor: pointer;
-                    font-weight: 600;
-                }
-                .focus-btn.active {
-                    background: #000;
-                    color: #fff;
-                }
-
-                .flex-center { display: flex; align-items: center; gap: 0.5em; }
-            `}</style>
-// ... existing code ...
-            <div className="premium-grid">
-                <div className="glass-card config-panel">
-                    <h2 style={{ fontSize: '1.2em', marginBottom: '1.5em', display: 'flex', alignItems: 'center', gap: '0.5em', textTransform: 'uppercase', borderBottom: '0.15em solid #000', paddingBottom: '0.5em' }}>
-                        <Target size="1.2em" /> &gt; Configuration
-                    </h2>
-
-                    <form onSubmit={handleGenerate} style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-                        <div style={{ marginBottom: '1.5em' }}>
-                            <label className="form-label">TARGET_DATE</label>
-                            <div style={{ position: 'relative' }}>
-                                <input
-                                    type="date"
-                                    required
-                                    className="premium-input"
-                                    value={inputs.targetDate}
-                                    style={{ colorScheme: 'light' }}
-                                    onChange={e => setInputs({ ...inputs, targetDate: e.target.value })}
-                                />
-                            </div>
+                    <form onSubmit={handleGenerate} className="space-y-6">
+                        {/* Target Date */}
+                        <div className="space-y-2">
+                            <label className="text-xs font-bold text-earth-600 uppercase tracking-widest">
+                                Target Date
+                            </label>
+                            <input
+                                type="date"
+                                required
+                                className="w-full px-4 py-3 bg-earth-50 border-2 border-earth-200 rounded-lg focus:border-earth-800 focus:bg-white focus:shadow-neobrutalism transition-all outline-none font-mono text-earth-800"
+                                value={inputs.targetDate}
+                                onChange={e => setInputs({ ...inputs, targetDate: e.target.value })}
+                            />
                         </div>
 
-                        <div style={{ marginBottom: '1.5em' }}>
-                            <label className="form-label" style={{ textAlign: 'center', marginBottom: '0.8em' }}>
-                                INTENSITY_LEVEL
+                        {/* Intensity Level */}
+                        <div className="space-y-3">
+                            <label className="text-xs font-bold text-earth-600 uppercase tracking-widest text-center block">
+                                Daily Intensity
                             </label>
-
-                            <div style={{ display: 'flex', justifyContent: 'center', gap: '1.2em' }}>
+                            <div className="flex justify-center gap-4">
                                 {[6, 8, 10].map(hours => (
                                     <button
                                         key={hours}
                                         type="button"
                                         onClick={() => setInputs({ ...inputs, dailyHours: hours })}
-                                        className={`hour-circle ${inputs.dailyHours === hours ? 'active' : 'inactive'}`}
+                                        className={`
+                                            w-14 h-14 rounded-xl flex flex-col items-center justify-center border-2 transition-all font-bold
+                                            ${inputs.dailyHours === hours
+                                                ? 'bg-earth-800 border-earth-800 text-white shadow-neobrutalism translate-y-[-2px]'
+                                                : 'bg-white border-earth-200 text-earth-600 hover:border-earth-400 hover:bg-earth-50'
+                                            }
+                                        `}
                                     >
-                                        {hours}h
+                                        <span className="text-lg leading-none">{hours}</span>
+                                        <span className="text-[10px] uppercase font-mono mt-0.5 opacity-80">Hrs</span>
                                     </button>
                                 ))}
                             </div>
                         </div>
 
-                        <div style={{ marginBottom: '2em' }}>
-                            <label className="form-label">FOCUS_AREA</label>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5em' }}>
+                        {/* Focus Area */}
+                        <div className="space-y-2">
+                            <label className="text-xs font-bold text-earth-600 uppercase tracking-widest">
+                                Priority Focus
+                            </label>
+                            <div className="grid grid-cols-2 gap-3">
                                 {['balanced', 'physics', 'chemistry', 'biology'].map(type => (
                                     <button
                                         key={type}
                                         type="button"
-                                        className={`focus-btn ${inputs.focusArea === type ? 'active' : ''}`}
+                                        className={`
+                                            py-2.5 px-3 rounded-lg border-2 text-sm font-bold uppercase tracking-wide transition-all
+                                            ${inputs.focusArea === type
+                                                ? 'bg-earth-100 border-earth-800 text-earth-900 shadow-sm'
+                                                : 'bg-white border-earth-200 text-earth-500 hover:border-earth-400'
+                                            }
+                                        `}
                                         onClick={() => setInputs({ ...inputs, focusArea: type })}
                                     >
                                         {type}
@@ -497,102 +219,143 @@ const StudyPlan = () => {
                             </div>
                         </div>
 
-                        <button type="submit" className="generate-btn" disabled={loading} style={{ marginTop: 'auto' }}>
-                            {loading ? <span>PROCESSING...</span> : (
+                        {/* Submit Action */}
+                        <button
+                            type="submit"
+                            className="btn-primary w-full flex items-center justify-center gap-2 mt-8 group"
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <span className="animate-pulse">PROCESSING...</span>
+                            ) : (
                                 <>
-                                    <Terminal size="1em" /> EXECUTE_PLAN
+                                    <Terminal size={18} />
+                                    <span>GENERATE PROTOCOL</span>
+                                    <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform opacity-70" />
                                 </>
                             )}
                         </button>
                     </form>
 
                     {statusText && (
-                        <div style={{ marginTop: '1.2em', fontSize: '0.9em', color: '#000', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5em', fontFamily: 'monospace' }}>
-                            {loading && <span>[LOADING]</span>}
+                        <div className="mt-4 p-3 bg-earth-50 border border-earth-200 rounded-lg text-xs font-mono text-center text-earth-600 flex items-center justify-center gap-2 animate-in fade-in slide-in-from-top-1">
+                            <div className="w-2 h-2 bg-earth-600 rounded-full animate-pulse" />
                             {statusText}
                         </div>
                     )}
                 </div>
 
-                <div className="glass-card results-panel">
-                    <div className="scroll-layout">
-                        {!planData ? (
-                            <div className="empty-state">
-                                <div className="empty-icon-circle">
-                                    <Bot size="2.5em" color="#000" />
-                                </div>
-                                <h3 style={{ fontSize: '1.2em', color: '#000', marginBottom: '0.5em', textTransform: 'uppercase' }}>No Data Found</h3>
-                                <p style={{ maxWidth: '20em', lineHeight: 1.6, fontSize: '0.9em' }}>
-                                    // INPUT PARAMETERS REQUIRED
-                                // INITIATE SYSTEM
-                                </p>
+                {/* Results Panel */}
+                <div className="lg:col-span-8 flex flex-col h-full">
+                    {!planData ? (
+                        <div className="card-premium flex flex-col items-center justify-center py-20 text-center min-h-[500px]">
+                            <div className="w-24 h-24 bg-earth-50 border-2 border-earth-200 rounded-full flex items-center justify-center mb-6 animate-bounce-slow">
+                                <Layout size={40} className="text-earth-400" />
                             </div>
-                        ) : (
-                            <div className="results-content animate-fade-in">
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'end', marginBottom: '2em', borderBottom: '0.15em solid #000', paddingBottom: '1.5em' }}>
-                                    <div>
-                                        <h2 style={{ fontSize: '1.4em', marginBottom: '0.5em', textTransform: 'uppercase' }}>Mission Roadmap</h2>
-                                        <div style={{ display: 'flex', gap: '1em', fontSize: '0.9em', color: '#525252' }}>
-                                            <span className="flex-center"><Clock size="1em" /> HOURS: {planData.hours}/DAY</span>
-                                            <span className="flex-center"><Target size="1em" /> FOCUS: {planData.focus.toUpperCase()}</span>
-                                        </div>
+                            <h3 className="text-xl font-bold text-earth-800 uppercase mb-2">Awaiting Parameters</h3>
+                            <p className="text-earth-500 max-w-sm mx-auto font-mono text-sm leading-relaxed">
+                                // SYSTEM STANDBY<br />
+                                // CONFIGURE INPUTS TO INITIATE<br />
+                                // STUDY PROTOCOL GENERATION
+                            </p>
+                        </div>
+                    ) : (
+                        <div
+                            className="card-premium flex flex-col animate-in slide-in-from-bottom-4 fade-in duration-500"
+                            style={{ height: dashboardHeight }}
+                        >
+                            {/* Results Header */}
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-8 pb-6 border-b-2 border-earth-100">
+                                <div>
+                                    <h2 className="text-2xl font-display font-black text-earth-800 uppercase tracking-tight flex items-center gap-2">
+                                        Mission Roadmap
+                                    </h2>
+                                    <div className="flex items-center gap-4 mt-2 text-sm font-mono font-bold text-earth-600">
+                                        <span className="flex items-center gap-1.5 px-2 py-1 bg-earth-50 rounded border border-earth-200">
+                                            <Clock size={14} /> {planData.hours}H / DAY
+                                        </span>
+                                        <span className="flex items-center gap-1.5 px-2 py-1 bg-earth-50 rounded border border-earth-200">
+                                            <Target size={14} /> {planData.focus.toUpperCase()}
+                                        </span>
                                     </div>
-                                    <button className="secondary"
-                                        onClick={() => addToast("Calendar Synced")}
-                                        style={{
-                                            background: '#fff',
-                                            color: '#000',
-                                            border: '0.15em solid #000',
-                                            padding: '0.6em 1.2em',
-                                            fontSize: '0.9em',
-                                            cursor: 'pointer',
-                                            fontWeight: 700,
-                                            textTransform: 'uppercase'
-                                        }}>
-                                        Sync_Cal
-                                    </button>
                                 </div>
+                                <button
+                                    className="btn-outline flex items-center gap-2 text-sm py-2 px-4 ml-auto sm:ml-0"
+                                    onClick={() => addToast("Calendar Synced")}
+                                >
+                                    <Calendar size={16} />
+                                    SYNC CALENDAR
+                                </button>
+                            </div>
 
-                                <div className="timeline-container">
-                                    {planData.schedule.map((dayItem, idx) => (
-                                        <div key={idx} className="day-group">
-                                            <div className="day-header">
-                                                <Calendar size="1.1em" style={{ marginRight: '0.5em', color: '#000' }} />
-                                                {dayItem.day}
-                                            </div>
+                            {/* Timeline Content */}
+                            <div className="space-y-8 pr-2 custom-scrollbar overflow-y-auto flex-1">
+                                {planData.schedule.map((dayItem, idx) => (
+                                    <div key={idx} className="relative pl-8 border-l-2 border-earth-200 last:border-0 pb-8 last:pb-0">
+                                        {/* Timeline Dot */}
+                                        <div className="absolute -left-[9px] top-0 w-[16px] h-[16px] bg-earth-800 border-2 border-white ring-2 ring-earth-100 rounded-full" />
+
+                                        <h3 className="text-lg font-display font-bold text-earth-800 mb-4 flex items-center uppercase">
+                                            {dayItem.day}
+                                        </h3>
+
+                                        <div className="grid gap-3">
                                             {dayItem.sessions.map((session, sIdx) => {
+                                                const subjectLower = session.subject.name.toLowerCase();
+                                                const isPhysics = subjectLower.includes('physics');
+                                                const isBio = subjectLower.includes('biology');
+                                                const isChem = subjectLower.includes('chemistry');
+
+                                                let accentColor = 'border-earth-200 hover:border-earth-400 bg-white';
+                                                let iconColor = 'bg-earth-100 text-earth-700';
+
+                                                if (isPhysics) {
+                                                    accentColor = 'border-cyan-200 hover:border-cyan-400 bg-cyan-50/30';
+                                                    iconColor = 'bg-cyan-100 text-cyan-800';
+                                                } else if (isBio) {
+                                                    accentColor = 'border-green-200 hover:border-green-400 bg-green-50/30';
+                                                    iconColor = 'bg-green-100 text-green-800';
+                                                } else if (isChem) {
+                                                    accentColor = 'border-orange-200 hover:border-orange-400 bg-orange-50/30';
+                                                    iconColor = 'bg-orange-100 text-orange-800';
+                                                }
+
                                                 return (
-                                                    <div key={sIdx} className="session-card">
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1em' }}>
-                                                            <div style={{
-                                                                padding: '0.3em',
-                                                                border: '0.15em solid #000',
-                                                                display: 'flex', alignItems: 'center', justifyContent: 'center'
-                                                            }}>
-                                                                <BookOpen size="1em" color="#000" />
-                                                            </div>
-                                                            <div>
-                                                                <div style={{ fontSize: '1em', fontWeight: 700, marginBottom: '0.3em' }}>
-                                                                    UNIT {session.chapter}
+                                                    <div
+                                                        key={sIdx}
+                                                        className={`
+                                                            group relative p-4 rounded-xl border-2 transition-all duration-200 hover:-translate-y-1 hover:shadow-md
+                                                            ${accentColor}
+                                                        `}
+                                                    >
+                                                        <div className="flex justify-between items-center gap-4">
+                                                            <div className="flex items-center gap-4">
+                                                                <div className={`p-2.5 rounded-lg border border-transparent group-hover:bg-white transition-colors ${iconColor}`}>
+                                                                    <BookOpen size={20} />
                                                                 </div>
-                                                                <span className="tag-modern">
-                                                                    {session.subject.name}
-                                                                </span>
+                                                                <div>
+                                                                    <h4 className="font-bold text-earth-900 leading-tight uppercase tracking-tight">
+                                                                        Unit: {session.chapter}
+                                                                    </h4>
+                                                                    <span className="text-xs font-bold text-earth-500 uppercase tracking-widest mt-1 block">
+                                                                        {session.subject.name}
+                                                                    </span>
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5em', color: '#000', fontSize: '0.9em', fontWeight: 600 }}>
-                                                            {session.duration}H
-                                                            <ChevronRight size="1em" />
+                                                            <div className="flex items-center gap-2 font-mono font-bold text-earth-700 bg-white/50 px-3 py-1.5 rounded-lg border border-earth-100">
+                                                                <Clock size={14} />
+                                                                {session.duration}h
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 );
                                             })}
                                         </div>
-                                    ))}
-                                </div>
+                                    </div>
+                                ))}
                             </div>
-                        )}
-                    </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

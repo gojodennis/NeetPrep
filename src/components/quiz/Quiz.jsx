@@ -145,42 +145,34 @@ const Quiz = () => {
     if (view === 'setup') {
         return (
             <div className="view-section active animate-fade-in quiz-wrapper">
-                <header>
-                    <h1 className="flex-center" style={{ gap: '10px' }}>
-                        <Zap size={32} strokeWidth={3} /> Quick Fire Quiz
-                    </h1>
+                <header className="quiz-header">
+                    <Zap size={32} strokeWidth={3} className="text-earth-500" />
+                    <h1>Quick Fire Quiz</h1>
                 </header>
 
-                <div className="card" style={{ textAlign: 'center', padding: '3rem 1.5rem' }}>
-                    <div style={{ marginBottom: '2rem' }}>
+                <div className="setup-card">
+                    <div className="mb-8">
                         <h3>Select Your Challenge</h3>
-                        <p className="text-muted">Questions adapted from past NEET papers</p>
+                        <p className="text-earth-600 mt-2 font-medium">Questions adapted from past NEET papers</p>
                     </div>
 
-                    <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '1rem', maxWidth: '600px', margin: '0 auto 2rem' }}>
+                    <div className="subject-grid">
                         {['physics', 'chemistry', 'biology'].map(sub => (
                             <button
                                 key={sub}
-                                className={quiz.subject === sub ? 'active' : 'secondary'}
+                                className={`subject-btn ${quiz.subject === sub ? 'active' : ''}`}
                                 onClick={() => updateQuizState({ subject: sub })}
-                                style={{
-                                    borderWidth: quiz.subject === sub ? '4px' : '2px',
-                                    transform: quiz.subject === sub ? 'scale(1.05)' : 'none',
-                                    flexDirection: 'column',
-                                    padding: '1.5rem',
-                                    gap: '0.5rem'
-                                }}
                             >
-                                <div style={{ marginBottom: '0.25rem' }}>
-                                    {sub === 'physics' ? <Atom size={28} /> : sub === 'chemistry' ? <FlaskConical size={28} /> : <Dna size={28} />}
+                                <div className="mb-1">
+                                    {sub === 'physics' ? <Atom size={32} /> : sub === 'chemistry' ? <FlaskConical size={32} /> : <Dna size={32} />}
                                 </div>
                                 {sub.charAt(0).toUpperCase() + sub.slice(1)}
                             </button>
                         ))}
                     </div>
 
-                    <button onClick={startQuiz} style={{ fontSize: '1.25rem', padding: '1rem 3rem' }}>
-                        Start Quiz <Play size={20} fill="currentColor" />
+                    <button className="start-btn" onClick={startQuiz}>
+                        Start Quiz <Play size={24} fill="currentColor" />
                     </button>
                 </div>
             </div>
@@ -194,28 +186,28 @@ const Quiz = () => {
 
         return (
             <div className="view-section active animate-fade-in quiz-wrapper">
-                <div className="card" style={{ padding: '2rem', height: '100%', display: 'flex', flexDirection: 'column' }}>
-                    <div style={{ textAlign: 'center', marginBottom: 'auto' }}>
-                        <div style={{ fontSize: '4rem', marginBottom: '1rem', animation: 'fadeIn 0.5s' }}>
+                <div className="results-card">
+                    <div className="mb-auto">
+                        <div className="result-emoji">
                             {accuracy >= 80 ? '🏆' : accuracy >= 50 ? '👏' : '📚'}
                         </div>
                         <h2>Assessment Complete!</h2>
-                        <p className="text-muted">Here is how you performed on this set.</p>
+                        <p className="text-earth-600 mt-2">Here is how you performed on this set.</p>
                     </div>
 
                     <div className="results-grid">
                         <div className="stat-card">
-                            <Target size={32} />
+                            <Target size={32} className="text-earth-500 mb-2" />
                             <div className="stat-value">{accuracy}%</div>
                             <div className="stat-label">Accuracy</div>
                         </div>
                         <div className="stat-card">
-                            <Clock size={32} />
+                            <Clock size={32} className="text-earth-500 mb-2" />
                             <div className="stat-value">{avgTime}s</div>
                             <div className="stat-label">Avg. Time</div>
                         </div>
                         <div className="stat-card">
-                            <Trophy size={32} />
+                            <Trophy size={32} className="text-earth-500 mb-2" />
                             <div className="stat-value">{stats.maxStreak}</div>
                             <div className="stat-label">Best Streak</div>
                         </div>
@@ -235,15 +227,15 @@ const Quiz = () => {
                             </div>
                         ))}
                     </div>
-                    <p style={{ textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.5rem', marginBottom: 'auto' }}>
+                    <p className="text-xs text-earth-600 font-mono mt-2 mb-auto">
                         Time spent per question (Lower is better)
                     </p>
 
-                    <div style={{ marginTop: '2.5rem', display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-                        <button className="secondary" onClick={() => setView('setup')}>
+                    <div className="actions-footer">
+                        <button className="btn-secondary" onClick={() => setView('setup')}>
                             <RotateCcw size={18} /> Menu
                         </button>
-                        <button onClick={startQuiz}>
+                        <button className="btn-primary-action" onClick={startQuiz}>
                             Retry Set <ArrowRight size={18} />
                         </button>
                     </div>
@@ -254,7 +246,7 @@ const Quiz = () => {
 
     // Active View
     const currentQ = quiz.questions[quiz.currentQuestionIndex];
-    if (!currentQ) return <div>Loading...</div>;
+    if (!currentQ) return <div className="flex items-center justify-center h-full font-bold text-xl">Loading...</div>;
 
     const progress = ((quiz.currentQuestionIndex) / quiz.questions.length) * 100;
 
@@ -264,19 +256,19 @@ const Quiz = () => {
                 <div className="progress-fill" style={{ width: `${progress}%` }}></div>
             </div>
 
-            <div className="card question-card">
+            <div className="question-card">
                 <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                        <span className={`tag tag-${quiz.subject}`}>
+                    <div className="question-meta">
+                        <span className={`quiz-tag`}>
                             {quiz.subject.toUpperCase()}
                         </span>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold' }}>
+                        <div className="quiz-timer">
                             <Clock size={18} /> {timer}s
                         </div>
                     </div>
 
                     <h3 className="question-text">
-                        <span style={{ color: 'var(--text-muted)', marginRight: '0.5rem' }}>
+                        <span className="question-number">
                             {quiz.currentQuestionIndex + 1}.
                         </span>
                         {currentQ.q}
@@ -299,22 +291,16 @@ const Quiz = () => {
                                     className={className}
                                     onClick={() => handleAnswer(idx)}
                                 >
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                        <div style={{
-                                            width: '24px', height: '24px',
-                                            border: '2px solid currentColor', borderRadius: '50%',
-                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            fontSize: '0.8rem'
-                                        }}>
-                                            {String.fromCharCode(65 + idx)}
-                                        </div>
-                                        {opt}
+                                    <div className="option-letter">
+                                        {String.fromCharCode(65 + idx)}
                                     </div>
+                                    <span className="font-medium text-lg">{opt}</span>
+
                                     {isAnswered && idx === currentQ.ans && (
-                                        <CheckCircle size={20} className="absolute-icon" style={{ position: 'absolute', right: '1rem' }} />
+                                        <CheckCircle size={24} className="ml-auto text-white" />
                                     )}
                                     {isAnswered && idx === selectedOption && idx !== currentQ.ans && (
-                                        <XCircle size={20} className="absolute-icon" style={{ position: 'absolute', right: '1rem' }} />
+                                        <XCircle size={24} className="ml-auto text-white" />
                                     )}
                                 </div>
                             );
@@ -324,12 +310,12 @@ const Quiz = () => {
 
                 {isAnswered && (
                     <div className="explanation-panel">
-                        <h4 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                            <Zap size={18} fill="currentColor" /> Explanation
+                        <h4 className="explanation-header">
+                            <Zap size={20} fill="currentColor" /> Explanation
                         </h4>
-                        <p>{currentQ.exp}</p>
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '1rem' }}>
-                            <button onClick={nextQuestion}>
+                        <p className="font-medium text-earth-700 leading-relaxed">{currentQ.exp}</p>
+                        <div className="flex justify-end">
+                            <button className="next-btn" onClick={nextQuestion}>
                                 {quiz.currentQuestionIndex < quiz.questions.length - 1 ? 'Next Question' : 'Finish Quiz'} <ArrowRight size={18} />
                             </button>
                         </div>
